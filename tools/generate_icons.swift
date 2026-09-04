@@ -17,26 +17,26 @@ func icon(_ label: String, pixels: Int) -> NSBitmapImageRep {
     context.clear(bounds)
     context.setFillColor(NSColor.black.cgColor)
     let outlined = label == "РУ"
-    // Keep the ICNS canvas square, but match the native badge's 4:3 silhouette.
-    let frame = CGRect(x: 0.35, y: 2.35, width: 15.3, height: 11.3)
+    // Fill the full 16 × 16 canvas; vertical padding makes custom icons too small.
+    let frame = bounds.insetBy(dx: 0.35, dy: 0.35)
     if outlined {
         context.setStrokeColor(NSColor.black.cgColor)
         context.setLineWidth(0.7)
-        context.addPath(CGPath(roundedRect: frame, cornerWidth: 4, cornerHeight: 4, transform: nil))
+        context.addPath(CGPath(roundedRect: frame, cornerWidth: 2.4, cornerHeight: 2.4, transform: nil))
         context.strokePath()
     } else {
-        context.addPath(CGPath(roundedRect: frame.insetBy(dx: -0.35, dy: -0.35), cornerWidth: 4.35, cornerHeight: 4.35, transform: nil))
+        context.addPath(CGPath(roundedRect: bounds, cornerWidth: 2.75, cornerHeight: 2.75, transform: nil))
         context.fillPath()
     }
 
     // RU uses visible strokes on transparency; US retains its cut-out mask.
     // Both remain template icons that macOS can tint for the current appearance.
-    let font = NSFont.systemFont(ofSize: 8, weight: .bold)
+    let font = NSFont.systemFont(ofSize: 10, weight: .bold)
     let text = NSAttributedString(string: label, attributes: [.font: font])
     let line = CTLineCreateWithAttributedString(text)
     let textBounds = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
-    let x = 2 - textBounds.minX
-    let y: CGFloat = 6 - textBounds.minY
+    let x = (16 - textBounds.width) / 2 - textBounds.minX
+    let y: CGFloat = 4.75 - textBounds.minY
     context.setBlendMode(outlined ? .normal : .destinationOut)
     for run in CTLineGetGlyphRuns(line) as! [CTRun] {
         let count = CTRunGetGlyphCount(run)
@@ -54,19 +54,19 @@ func icon(_ label: String, pixels: Int) -> NSBitmapImageRep {
     }
     context.fillPath()
 
-    // A 3 × 1.3 pt cross-input mark, inset from the rounded border.
-    context.setLineWidth(0.6)
+    // A 4 × 2 pt cross-input mark, inset from the rounded border.
+    context.setLineWidth(0.8)
     context.setLineCap(.round)
     context.setLineJoin(.round)
     context.setStrokeColor(NSColor.black.cgColor)
-    context.move(to: CGPoint(x: 10.25, y: 4.5))
-    context.addLine(to: CGPoint(x: 13.25, y: 4.5))
-    context.move(to: CGPoint(x: 11, y: 3.85))
-    context.addLine(to: CGPoint(x: 10.25, y: 4.5))
-    context.addLine(to: CGPoint(x: 11, y: 5.15))
-    context.move(to: CGPoint(x: 12.5, y: 3.85))
-    context.addLine(to: CGPoint(x: 13.25, y: 4.5))
-    context.addLine(to: CGPoint(x: 12.5, y: 5.15))
+    context.move(to: CGPoint(x: 9.75, y: 2.6))
+    context.addLine(to: CGPoint(x: 13.75, y: 2.6))
+    context.move(to: CGPoint(x: 10.75, y: 1.6))
+    context.addLine(to: CGPoint(x: 9.75, y: 2.6))
+    context.addLine(to: CGPoint(x: 10.75, y: 3.6))
+    context.move(to: CGPoint(x: 12.75, y: 1.6))
+    context.addLine(to: CGPoint(x: 13.75, y: 2.6))
+    context.addLine(to: CGPoint(x: 12.75, y: 3.6))
     context.strokePath()
     return rep
 }
