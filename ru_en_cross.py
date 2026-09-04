@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import shutil
 import sys
@@ -35,13 +34,15 @@ INFO_PLIST = """<?xml version="1.0" encoding="UTF-8"?>
 \t<key>CFBundleName</key>
 \t<string>Ru-En Cross Layouts</string>
 \t<key>CFBundleVersion</key>
-\t<string>2</string>
+\t<string>3</string>
 \t<key>KLInfo_USCrossRussianPC</key>
 \t<dict>
 \t\t<key>TISInputSourceID</key>
 \t\t<string>me.elagin.kir.keyboardlayout.ruencross.keylayout.USCrossRussianPC</string>
 \t\t<key>TISIntendedLanguage</key>
 \t\t<string>en</string>
+\t\t<key>TISIconIsTemplate</key>
+\t\t<true/>
 \t</dict>
 \t<key>KLInfo_RussianPCCrossUS</key>
 \t<dict>
@@ -49,6 +50,8 @@ INFO_PLIST = """<?xml version="1.0" encoding="UTF-8"?>
 \t\t<string>me.elagin.kir.keyboardlayout.ruencross.keylayout.RussianPCCrossUS</string>
 \t\t<key>TISIntendedLanguage</key>
 \t\t<string>ru</string>
+\t\t<key>TISIconIsTemplate</key>
+\t\t<true/>
 \t</dict>
 </dict>
 </plist>
@@ -61,9 +64,9 @@ VERSION_PLIST = """<?xml version="1.0" encoding="UTF-8"?>
 \t<key>ProjectName</key>
 \t<string>Ru-En Cross Layouts</string>
 \t<key>SourceVersion</key>
-\t<string>2</string>
+\t<string>3</string>
 \t<key>BuildVersion</key>
-\t<string>2</string>
+\t<string>3</string>
 </dict>
 </plist>
 """
@@ -72,86 +75,7 @@ INFO_PLIST_STRINGS = '''"USCrossRussianPC" = "U.S. cross Russian – PC";
 "RussianPCCrossUS" = "Russian – PC cross U.S.";
 '''
 
-ICONS_B64 = {
-    "RussianPCCrossUS.icns": (
-        "aWNucwAACDZpYzA1AAADo0FSR0KDAJH/hgCX/4IAmf+AAJv/AQAAm/8BAACb/wAA////////"
-        "///1/wAAm/8BAACb/wEAAJv/gACZ/4IAl/+GAJH/gwCDAJF+hgCXfoIAmX6AAJt+AQAAm34B"
-        "AACbfgAA4n6F/4F+Af//g34B//+HfoX/gX4B//+DfgH//4d+Af//g34F//9+fv//g34B//+H"
-        "fgH//4N+Bf//fn7//4N+Af//h34B//+DfgH//4F+Bf//fn7//4l+Af//g34B//+BfgX//35+"
-        "//+JfoX/hX4B//+LfoX/hX4B//+LfgH//4t+Af//i34B//+LfgH//4t+Af//i34B//+LfgH/"
-        "/4t+Af//i34B//+LfgH//4t+Af//i34C/01NgX4BTU2WfgVNTX5+TU2YfoFNmn4BTU2CfgAA"
-        "lH6BTYB+AQAAk34JTU1+fk1Nfn4AAJJ+AU1NgX4CTU1+gACZfoIAl36GAJF+gwCDAJF+hgCX"
-        "foIAmX6AAJt+AQAAm34BAACbfgAA4n6F/4F+Af//g34B//+HfoX/gX4B//+DfgH//4d+Af//"
-        "g34F//9+fv//g34B//+HfgH//4N+Bf//fn7//4N+Af//h34B//+DfgH//4F+Bf//fn7//4l+"
-        "Af//g34B//+BfgX//35+//+JfoX/hX4B//+LfoX/hX4B//+LfgH//4t+Af//i34B//+LfgH/"
-        "/4t+Af//i34B//+LfgH//4t+Af//i34B//+LfgH//4t+Af//i34C/5SUgX4BlJSWfgWUlH5+"
-        "lJSYfoGUmn4BlJSCfgAAlH6BlIB+AQAAk34JlJR+fpSUfn4AAJJ+AZSUgX4ClJR+gACZfoIA"
-        "l36GAJF+gwCDAJF+hgCXfoIAmX6AAJt+AQAAm34BAACbfgAA4n6F/4F+Af//g34B//+HfoX/"
-        "gX4B//+DfgH//4d+Af//g34F//9+fv//g34B//+HfgH//4N+Bf//fn7//4N+Af//h34B//+D"
-        "fgH//4F+Bf//fn7//4l+Af//g34B//+BfgX//35+//+JfoX/hX4B//+LfoX/hX4B//+LfgH/"
-        "/4t+Af//i34B//+LfgH//4t+Af//i34B//+LfgH//4t+Af//i34B//+LfgH//4t+Af//i36A"
-        "/4F+Af//ln4F//9+fv//mH6B/5p+Af//gn4AAJR+gf+AfgEAAJN+Cf//fn7//35+AACSfgH/"
-        "/4F+Av//foAAmX6CAJd+hgCRfoMAaWMxMQAAAbGJUE5HDQoaCgAAAA1JSERSAAAAIAAAACAI"
-        "BgAAAHN6evQAAAABc1JHQgCuzhzpAAAARGVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAA"
-        "AAADoAEAAwAAAAEAAQAAoAIABAAAAAEAAAAgoAMABAAAAAEAAAAgAAAAAKyGYvMAAAETSURB"
-        "VFgJ7ZfhDYIwEIXBOIN7uIgjQWAH53IPl9A8yUeOUpA0tEeM/dO7157v3UMK1NXCaJrmtbCU"
-        "BPd9X8cKJ+DepDFCYVbMKKAUOaIQ8RFQmtyKOJF4ze4Cai/7cdzdAXcBZ6ywc9d1Np3FbdtO"
-        "MPaHOJvW1o/pAMpTOqJ263xsB7Z2gVPhtQ7z2O+5OxA9iFAeUyyMjpfWqf+2T/XuDkTPATrb"
-        "0gF7U2d3B/4CfteB272qHpf5Q02YxaPnQOo/OqyD6Pocnp5hrv1ZBYgAUsUaiBmyAgeRJbQx"
-        "ArK/lq85oG+DrHcB5Oqc7sFwIJsAiCAWITFrwj6XQEHp1/PJp5kEaJQSAbk4RweU2LG3GEtq"
-        "ed79UmbhbYGM/gAAAABJRU5ErkJggmljMDQAAAGcQVJHQoAAh/+BAIv/AQAAi/8AAP//m/8A"
-        "AIv/AQAAi/+BAIf/gACAAId+gQCLfgEAAIt+AACPfoH/An5+/4B+AP+CfgD/gH4C/37/gH4A"
-        "/4J+AP+AfgX/fn7/fv+DfoH/gX4A/4R+AP+EfgD/hH4A/4R+AP+EfgD/hH4A/41+A01+fk2K"
-        "fgRNTX5+AIh+BE1NfgAAh34DTX5+TYEAh36AAIAAh36BAIt+AQAAi34AAI9+gf8Cfn7/gH4A"
-        "/4J+AP+AfgL/fv+AfgD/gn4A/4B+Bf9+fv9+/4N+gf+BfgD/hH4A/4R+AP+EfgD/hH4A/4R+"
-        "AP+EfgD/jX4DlH5+lIp+BJSUfn4AiH4ElJR+AACHfgOUfn6UgQCHfoAAgACHfoEAi34BAACL"
-        "fgAAj36B/wJ+fv+AfgD/gn4A/4B+Av9+/4B+AP+CfgD/gH4F/35+/37/g36B/4F+AP+EfgD/"
-        "hH4A/4R+AP+EfgD/hH4A/4R+AP+NfgP/fn7/in4E//9+fgCIfgT//34AAId+A/9+fv+BAId+"
-        "gABpbmZvAAABPmJwbGlzdDAw1AECAwQFBgcKWCR2ZXJzaW9uWSRhcmNoaXZlclQkdG9wWCRv"
-        "YmplY3RzEgABhqBfEA9OU0tleWVkQXJjaGl2ZXLRCAlUcm9vdIABpwsMFxgZGh5VJG51bGzT"
-        "DQ4PEBMWV05TLmtleXNaTlMub2JqZWN0c1YkY2xhc3OiERKAAoADohQVgASABYAGVG5hbWVf"
-        "EBZhc3NldGNhdGFsb2ctcmVmZXJlbmNlVGljb27TDQ4PGxwWoKCABtIfICEiWiRjbGFzc25h"
-        "bWVYJGNsYXNzZXNcTlNEaWN0aW9uYXJ5oiEjWE5TT2JqZWN0CBEaJCkyN0lMUVNbYWhwe4KF"
-        "h4mMjpCSl7C1vL2+wMXQ2ebpAAAAAAAAAQEAAAAAAAAAJAAAAAAAAAAAAAAAAAAAAPI="
-    ),
-    "USCrossRussianPC.icns": (
-        "aWNucwAABxBpYzA1AAAC5UFSR0KDAJH/hgCX/4IAmf+AAJv/AQAAm/8BAACb/wAA////////"
-        "///1/wAAm/8BAACb/wEAAJv/gACZ/4IAl/+GAJH/gwCDAJF+hgCXfoIAmX6AAJt+AQAAm34B"
-        "AACbfgAA6n6D/5d+g/+VfgH//4N+Af//k34B//+DfgH//5N+Af//g34B//+TfgH//4N+Af//"
-        "k36H/5N+h/+TfgH//4N+Af//k34B//+DfgH//5N+Af//g34B//+TfgH//4N+Af//k34B//+D"
-        "fgH//5N+Af//g34E//9+TU2BfgFNTZZ+BU1Nfn5NTZh+gU2afgFNTYJ+AACUfoFNgH4BAACT"
-        "fglNTX5+TU1+fgAAkn4BTU2BfgJNTX6AAJl+ggCXfoYAkX6DAIMAkX6GAJd+ggCZfoAAm34B"
-        "AACbfgEAAJt+AADqfoP/l36D/5V+Af//g34B//+TfgH//4N+Af//k34B//+DfgH//5N+Af//"
-        "g34B//+Tfof/k36H/5N+Af//g34B//+TfgH//4N+Af//k34B//+DfgH//5N+Af//g34B//+T"
-        "fgH//4N+Af//k34B//+DfgT//36UlIF+AZSUln4FlJR+fpSUmH6BlJp+AZSUgn4AAJR+gZSA"
-        "fgEAAJN+CZSUfn6UlH5+AACSfgGUlIF+ApSUfoAAmX6CAJd+hgCRfoMAgwCRfoYAl36CAJl+"
-        "gACbfgEAAJt+AQAAm34AAOp+g/+XfoP/"
-        "lX4B//+DfgH//5N+Af//g34B//+TfgH//4N+Af//k34B//+DfgH//5N+h/+Tfof/k34B//+D"
-        "fgH//5N+Af//g34B//+TfgH//4N+Af//k34B//+DfgH//5N+Af//g34B//+TfgH//4N+"
-        "BP//fv//gX4B"
-        "//+WfgX//35+//+YfoH/mn4B//+CfgAAlH6B/4B+AQAAk34J//9+fv//fn4AAJJ+Af//gX4C"
-        "//9+gACZfoIAl36GAJF+gwBpYzExAAABjolQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAA"
-        "c3p69AAAAAFzUkdCAK7OHOkAAABEZVhJZk1NACoAAAAIAAGHaQAEAAAAAQAAABoAAAAAAAOg"
-        "AQADAAAAAQABAACgAgAEAAAAAQAAACCgAwAEAAAAAQAAACAAAAAArIZi8wAAAPBJREFUWAnt"
-        "lwEKwyAQBLX0Df1HP6joB/uPfqJlEzZcRCMNOY+UHJTo2rJza0OMd40KIXwaS7vknLOv/XAl"
-        "Hm1aM4QmYRaAUeaEIsQEMNpcQtw4sbqaA3ir+Jm4eQLmAHdG8cs1pVT9eoyxqm+J50qAnbc6"
-        "7a3XkjBP4AI49C6o7XFPM9+CXQn07oJe13LdPIEL4H8TeD2Sw6esUlc9kBDg+Z6fkuUccKoA"
-        "MKApxijCzDPn1P8D0lCOCaB+LN9KAO8GqgnQHJ2ze2pMQA2ARjSGIcdcgzZtAQajj+erVzMA"
-        "oEZB0ByeSwKYyDoaRppKny8lLFX4rjaaDQAAAABJRU5ErkJggmljMDQAAAFXQVJHQoAAh/+B"
-        "AIv/AQAAi/8AAP//m/8AAIv/AQAAi/+BAIf/gACAAId+gQCLfgEAAIt+AACTfoD/iX4A/4B+"
-        "AP+IfgD/gH4A/4h+gv+IfgD/gH4A/4h+AP+AfgD/iH4A/4B+AP+OfgNNfn5Nin4ETU1+fgCI"
-        "fgRNTX4AAId+A01+fk2BAId+gACAAId+gQCLfgEAAIt+AACTfoD/iX4A/4B+AP+IfgD/gH4A"
-        "/4h+gv+IfgD/gH4A/4h+AP+AfgD/iH4A/4B+AP+OfgOUfn6Uin4ElJR+fgCIfgSUlH4AAId+"
-        "A5R+fpSBAId+gACAAId+gQCLfgEAAIt+AACTfoD/iX4A/4B+AP+IfgD/gH4A/4h+gv+IfgD/"
-        "gH4A/4h+AP+AfgD/iH4A/4B+AP+OfgP/fn7/in4E//9+fgCIfgT//34AAId+A/9+fv+BAId+"
-        "gABpbmZvAAABPmJwbGlzdDAw1AECAwQFBgcKWCR2ZXJzaW9uWSRhcmNoaXZlclQkdG9wWCRv"
-        "YmplY3RzEgABhqBfEA9OU0tleWVkQXJjaGl2ZXLRCAlUcm9vdIABpwsMFxgZGh5VJG51bGzT"
-        "DQ4PEBMWV05TLmtleXNaTlMub2JqZWN0c1YkY2xhc3OiERKAAoADohQVgASABYAGVG5hbWVf"
-        "EBZhc3NldGNhdGFsb2ctcmVmZXJlbmNlVGljb27TDQ4PGxwWoKCABtIfICEiWiRjbGFzc25h"
-        "bWVYJGNsYXNzZXNcTlNEaWN0aW9uYXJ5oiEjWE5TT2JqZWN0CBEaJCkyN0lMUVNbYWhwe4KF"
-        "h4mMjpCSl7C1vL2+wMXQ2ebpAAAAAAAAAQEAAAAAAAAAJAAAAAAAAAAAAAAAAAAAAPI="
-    ),
-}
+ICON_DIR = PROJECT_ROOT / "assets" / "icons"
 
 CROSS_MODIFIER_MAP = """<modifierMap id="Mods" defaultIndex="0">
   <keyMapSelect mapIndex="0">
@@ -291,12 +215,8 @@ def bundle_files() -> Dict[str, bytes]:
             "-19101",
             "USCrossRussianPC",
         ).encode("utf-8"),
-        "Contents/Resources/RussianPCCrossUS.icns": base64.b64decode(
-            ICONS_B64["RussianPCCrossUS.icns"]
-        ),
-        "Contents/Resources/USCrossRussianPC.icns": base64.b64decode(
-            ICONS_B64["USCrossRussianPC.icns"]
-        ),
+        "Contents/Resources/RussianPCCrossUS.icns": (ICON_DIR / "RussianPCCrossUS.icns").read_bytes(),
+        "Contents/Resources/USCrossRussianPC.icns": (ICON_DIR / "USCrossRussianPC.icns").read_bytes(),
     }
 
 

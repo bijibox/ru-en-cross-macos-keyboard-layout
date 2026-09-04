@@ -145,6 +145,7 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(xml.get('name'), filename)
             source_ids.add(entry['TISInputSourceID'])
             self.assertIn(entry['TISIntendedLanguage'], ('en', 'ru'))
+            self.assertTrue(entry['TISIconIsTemplate'])
             self.assertTrue(files[f'Contents/Resources/{filename}.icns'].startswith(b'icns'))
         self.assertEqual(len(source_ids), 2)
 
@@ -161,6 +162,7 @@ class BuildTests(unittest.TestCase):
             checkout = Path(temp)
             shutil.copy2(ROOT / 'ru_en_cross.py', checkout)
             shutil.copytree(ROOT / 'data', checkout / 'data')
+            shutil.copytree(ROOT / 'assets', checkout / 'assets')
             result = subprocess.run([sys.executable, str(checkout / 'ru_en_cross.py'), 'build'],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
