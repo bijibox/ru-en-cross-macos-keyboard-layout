@@ -1,4 +1,4 @@
-.PHONY: build test install clean
+.PHONY: build test test-macos install clean
 
 PYTHON ?= python3
 
@@ -7,6 +7,9 @@ build:
 
 test:
 	$(PYTHON) -m unittest discover -s tests
+
+test-macos:
+	$(PYTHON) tools/check_macos.py
 
 install:
 	$(PYTHON) ru_en_cross.py install
